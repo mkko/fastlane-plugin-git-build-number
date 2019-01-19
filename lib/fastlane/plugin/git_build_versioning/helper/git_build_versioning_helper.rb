@@ -39,10 +39,15 @@ module Fastlane
       # class methods that you define here become available in your action
       # as `Helper::GitBuildVersioningHelper.your_method`
       #
-      def self.reserve_build_number
+      def self.reserve_build_number(tag_prefix)
         if self.is_git?
           puts "is_git? yes"
           builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
+          tags = builds.split( /\r?\n/ )
+            .map { |s| GitTag.new(s, tag_prefix) }
+            .select { |t| t.is_build_number? }
+            .map { |t| t.tag_name }
+            .sort
           
           puts builds
         else
@@ -50,12 +55,12 @@ module Fastlane
         end
       end
       
-      def self.current_build_number
+      def self.current_build_number(tag_prefix)
         if self.is_git?
 
           builds = Actions.sh("git ls-remote --tags --refs --quiet | grep `git rev-parse HEAD`", log: false)
           tags = builds.split( /\r?\n/ )
-            .map { |s| GitTag.new(s, 'build/') }
+            .map { |s| GitTag.new(s, tag_prefix) }
             .select { |t| t.is_build_number? }
             .map { |t| t.tag_name }
             .sort

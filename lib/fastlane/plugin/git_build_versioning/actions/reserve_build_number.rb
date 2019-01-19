@@ -6,7 +6,8 @@ module Fastlane
 
     class ReserveBuildNumberAction < Action
       def self.run(params)
-        Helper::GitBuildVersioningHelper.reserve_build_number
+        tags_prefix = params[:tag_prefix]
+        Helper::GitBuildVersioningHelper.reserve_build_number(tags_prefix)
       end
 
       def self.description
@@ -34,11 +35,11 @@ module Fastlane
 
       def self.available_options
         [
-          # FastlaneCore::ConfigItem.new(key: :your_option,
-          #                         env_name: "GIT_BUILD_VERSIONING_YOUR_OPTION",
-          #                      description: "A description of your option",
-          #                         optional: false,
-          #                             type: String)
+          FastlaneCore::ConfigItem.new(key: :tag_prefix,
+                                  env_name: "GIT_BUILD_VERSIONING_TAG_PREFIX",
+                               description: "A prefix to be used with tag names",
+                                  optional: true,
+                                      type: String)
         ]
       end
 
