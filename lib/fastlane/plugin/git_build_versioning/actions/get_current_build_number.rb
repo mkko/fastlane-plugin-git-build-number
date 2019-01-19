@@ -3,13 +3,20 @@ require_relative '../helper/git_build_versioning_helper'
 
 module Fastlane
   module Actions
-    class GitBuildVersioningAction < Action
+
+    class CurrentBuildNumberAction < Action
       def self.run(params)
-        UI.message("The git_build_versioning plugin is working!")
+        Helper::GitBuildVersioningHelper.current_build_number
       end
 
       def self.description
-        "Use git for tagging your builds for distributed sequential builds"
+        "Use git for tagging your builds for unique distributed sequential build numbers"
+      end
+
+      def self.output
+        [
+          ['GIT_BUILD_NUMBER', 'The build number from git']
+        ]
       end
 
       def self.authors
@@ -21,8 +28,8 @@ module Fastlane
       end
 
       def self.details
-        # Optional:
-        "This plugin will store build numbers as tags in the git repository. This makes it possible to create unique but reproducible builds in a distributed system. Storing build numbers in the git repository has several benefits over the traditional bump commits: each build is guaranteed to always have unique build number, the build numbers don't cause merge conflicts, it is very lightweight (when comparing to bump commits) and finally, it is highly visual as you can see your builds in the git history."
+        <<-DETAILS
+        DETAILS
       end
 
       def self.available_options
@@ -40,7 +47,7 @@ module Fastlane
         # See: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
         #
         # [:ios, :mac, :android].include?(platform)
-        true
+        [:ios, :mac].include?(platform)
       end
     end
   end
