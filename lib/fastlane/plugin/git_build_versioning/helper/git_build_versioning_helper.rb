@@ -52,8 +52,6 @@ module Fastlane
         head = self.head
         tags = self.build_tags(tag_prefix)
 
-        puts "Head at #{head}"
-        puts "Tags: #{tags}"
         current = tags
           .select { |t| t.hash == head }
           .map { |t| t.build_number }
@@ -67,7 +65,9 @@ module Fastlane
           
           tag_name = "#{tag_prefix}#{current}"
           Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
-          puts "Tagging #{tag_name}"
+          UI.success("Tagging #{tag_name}")
+        else
+          UI.success("Current commit already tagged as build #{tag_name}")
         end
         
         current
@@ -90,7 +90,8 @@ module Fastlane
 
       def self.head
         if self.is_git?
-          Actions.sh("git rev-parse HEAD", log: false)
+          head = Actions.sh("git rev-parse HEAD", log: false)
+          (head || "").strip
         else
           UI.user_error!("No git repository detected")
         end
