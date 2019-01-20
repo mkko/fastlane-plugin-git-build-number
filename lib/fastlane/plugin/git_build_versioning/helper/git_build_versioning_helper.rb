@@ -30,17 +30,16 @@ module Fastlane
       end
 
       def is_build_number?
-        @str.split('refs/tags/').last.start_with?(@tag_prefix)
+        (@str.split('refs/tags/').last || '').start_with?(@tag_prefix)
       end
 
       def to_s
         "GitBuildTag<#{self.hash}, #{self.build_number}>"
       end
-    end  
-    
+    end
+
     class GitBuildVersioningHelper
       def self.is_git?
-        puts "is_git?"
         Actions.sh('git rev-parse HEAD', log: false)
         return true
       rescue
@@ -50,39 +49,31 @@ module Fastlane
       # as `Helper::GitBuildVersioningHelper.your_method`
       #
       def self.reserve_build_number(tag_prefix)
-        if self.is_git?
-          puts "is_git? yes"
-          builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
-          tags = builds.split( /\r?\n/ )
-            .map { |s| GitBuildTag.new(s, tag_prefix) }
-            .select { |t| t.is_build_number? }
-            .map { |t| t.tag_name }
-            .sort
-          
-          puts builds
-        else
-          UI.user_error!("No git repository detected")
-        end
-      end
-      
-      def self.last_build_number(tag_prefix)
-        if self.is_git?
+        head = self.head
+        tags = self.build_tags(tag_prefix)
 
-          builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
-          tags = builds.split( /\r?\n/ )
-            .map { |s| GitBuildTag.new(s, tag_prefix) }
-            .select { |t| t.is_build_number? }
-            .map { |t| t.tag_name }
-            .sort
-            
-          tags.last
-        else
-          UI.user_error!("No git repository detected")
+        current = tags
+          .select { |t| t.hash == head }
+          .map { |t| t.build_number }
+          .last
+
+        if current == nil
+          latest = tags
+            .map { |t| t.build_number }
+            .last
+          current = latest + 1
         end
-      end
-      
-      def self.current_build_number(tag_prefix)
         
+        current
+      end
+
+      def self.last_build_number(tag_prefix)
+        self.build_tags(tag_prefix)
+          .map { |t| t.build_number }
+          .last
+      end
+
+      def self.current_build_number(tag_prefix)
         head = self.head
         tags = self.build_tags(tag_prefix)
 
@@ -90,7 +81,7 @@ module Fastlane
           .map { |t| t.build_number }
           .last
       end
-      
+
       def self.head
         if self.is_git?
           Actions.sh("git rev-parse HEAD", log: false)
@@ -98,16 +89,16 @@ module Fastlane
           UI.user_error!("No git repository detected")
         end
       end
-      
+
       def self.build_tags(tag_prefix)
         if self.is_git?
-          
+
           builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
           tags = builds.split( /\r?\n/ )
             .map { |s| GitBuildTag.new(s, tag_prefix) }
             .select { |t| t.build_number != nil }
             .sort { |a,b| a.build_number <=> b.build_number }
-            
+
           tags
         else
           UI.user_error!("No git repository detected")
