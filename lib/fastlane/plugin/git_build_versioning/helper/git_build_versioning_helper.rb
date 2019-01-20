@@ -68,6 +68,7 @@ module Fastlane
             tag: tag_name
           )
           Actions::PushGitTagsAction.run(
+            remote: 'origin',
             tag: tag_name
           )
           #Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
