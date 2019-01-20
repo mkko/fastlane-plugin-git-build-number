@@ -62,6 +62,10 @@ module Fastlane
             .map { |t| t.build_number }
             .last
           current = latest + 1
+          
+          tag_name = "#{tag_prefix}#{current}"
+          Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
+          puts "Tagging #{tag_name}"
         end
         
         current

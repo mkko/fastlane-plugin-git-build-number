@@ -31,9 +31,15 @@ describe Fastlane::Actions::ReserveBuildNumberAction do
     end
 
     it "Returns new build number when no current build" do
+      expected_build = 74
+      expected_tag = "build/#{expected_build}"
 
       allow(Fastlane::Actions).to receive(:sh).with("git rev-parse HEAD", anything)
         .and_return('954a29b7a3e69433d080a950be20550f6e2b1306')
+
+      expect(Fastlane::Actions).to receive(:sh)
+        .with("git tag #{expected_tag} && git push --quiet origin #{expected_tag}", anything)
+        .and_return('')
 
       result = Fastlane::FastFile.new.parse("lane :test do
         reserve_build_number
