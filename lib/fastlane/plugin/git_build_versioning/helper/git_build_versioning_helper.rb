@@ -1,37 +1,47 @@
 require 'fastlane_core/ui/ui'
 
+def number_or_nil(string)
+  num = string.to_i
+  num if num.to_s == string
+end
+
 module Fastlane
   UI = FastlaneCore::UI unless Fastlane.const_defined?("UI")
 
   module Helper
-    class GitTag
+    class GitBuildTag
       def initialize(str, tag_prefix)
         # Instance variables
         @tag_prefix = tag_prefix
         @str = str
       end
-  
+
       def hash
-        @str.split('refs/tags/').first
+        (@str.split('refs/tags/').first || '').strip
       end
-      
-      def tag_name
+
+      def build_number
         if self.is_build_number?
-          @str.split('refs/tags/').last.delete_prefix(@tag_prefix)
+          tag_name = @str.split('refs/tags/').last.delete_prefix(@tag_prefix)
+          number_or_nil(tag_name)
         else
           nil
         end
       end
-  
+
       def is_build_number?
         @str.split('refs/tags/').last.start_with?(@tag_prefix)
+      end
+
+      def to_s
+        "GitBuildTag<#{self.hash}, #{self.build_number}>"
       end
     end  
     
     class GitBuildVersioningHelper
       def self.is_git?
         puts "is_git?"
-        Actions.sh('git rev-parse HEAD')
+        Actions.sh('git rev-parse HEAD', log: false)
         return true
       rescue
         return false
@@ -44,7 +54,7 @@ module Fastlane
           puts "is_git? yes"
           builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
           tags = builds.split( /\r?\n/ )
-            .map { |s| GitTag.new(s, tag_prefix) }
+            .map { |s| GitBuildTag.new(s, tag_prefix) }
             .select { |t| t.is_build_number? }
             .map { |t| t.tag_name }
             .sort
@@ -55,17 +65,50 @@ module Fastlane
         end
       end
       
-      def self.current_build_number(tag_prefix)
+      def self.last_build_number(tag_prefix)
         if self.is_git?
 
-          builds = Actions.sh("git ls-remote --tags --refs --quiet | grep `git rev-parse HEAD`", log: false)
+          builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
           tags = builds.split( /\r?\n/ )
-            .map { |s| GitTag.new(s, tag_prefix) }
+            .map { |s| GitBuildTag.new(s, tag_prefix) }
             .select { |t| t.is_build_number? }
             .map { |t| t.tag_name }
             .sort
             
           tags.last
+        else
+          UI.user_error!("No git repository detected")
+        end
+      end
+      
+      def self.current_build_number(tag_prefix)
+        
+        head = self.head
+        tags = self.build_tags(tag_prefix)
+
+        tags.select { |t| t.hash == head }
+          .map { |t| t.build_number }
+          .last
+      end
+      
+      def self.head
+        if self.is_git?
+          Actions.sh("git rev-parse HEAD", log: false)
+        else
+          UI.user_error!("No git repository detected")
+        end
+      end
+      
+      def self.build_tags(tag_prefix)
+        if self.is_git?
+          
+          builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
+          tags = builds.split( /\r?\n/ )
+            .map { |s| GitBuildTag.new(s, tag_prefix) }
+            .select { |t| t.build_number != nil }
+            .sort { |a,b| a.build_number <=> b.build_number }
+            
+          tags
         else
           UI.user_error!("No git repository detected")
         end
