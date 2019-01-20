@@ -61,7 +61,7 @@ module Fastlane
           latest = tags
             .map { |t| t.build_number }
             .last
-          current = latest + 1
+          current = (latest || 0) + 1
           
           tag_name = "#{tag_prefix}#{current}"
           Actions::AddGitTagAction.run(

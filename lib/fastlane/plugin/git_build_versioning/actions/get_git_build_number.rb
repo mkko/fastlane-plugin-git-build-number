@@ -1,6 +1,3 @@
-#require 'fastlane/action'
-#require_relative '../helper/git_build_versioning_helper'
-
 module Fastlane
   module Actions
 
