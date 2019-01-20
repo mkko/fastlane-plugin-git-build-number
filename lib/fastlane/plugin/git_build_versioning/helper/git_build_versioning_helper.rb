@@ -52,6 +52,8 @@ module Fastlane
         head = self.head
         tags = self.build_tags(tag_prefix)
 
+        puts "Head at #{head}"
+        puts "Tags: #{tags}"
         current = tags
           .select { |t| t.hash == head }
           .map { |t| t.build_number }
@@ -64,14 +66,7 @@ module Fastlane
           current = (latest || 0) + 1
           
           tag_name = "#{tag_prefix}#{current}"
-          Actions::AddGitTagAction.run(
-            tag: tag_name
-          )
-          Actions::PushGitTagsAction.run(
-            remote: 'origin',
-            tag: tag_name
-          )
-          #Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
+          Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
           puts "Tagging #{tag_name}"
         end
         
