@@ -4,7 +4,7 @@
 module Fastlane
   module Actions
 
-    class GetCurrentBuildNumberAction < Action
+    class GetGitBuildNumberAction < Action
       def self.run(params)
         tag_prefix = (params[:tag_prefix] || 'build/')
         Helper::GitBuildVersioningHelper.current_build_number(tag_prefix)

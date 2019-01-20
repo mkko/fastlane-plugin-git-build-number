@@ -4,7 +4,7 @@ require_relative '../helper/git_build_versioning_helper'
 module Fastlane
   module Actions
 
-    class ReserveBuildNumberAction < Action
+    class ReserveGitBuildNumberAction < Action
       def self.run(params)
         tags_prefix = (params[:tag_prefix] || 'build/')
         Helper::GitBuildVersioningHelper.reserve_build_number(tags_prefix)
