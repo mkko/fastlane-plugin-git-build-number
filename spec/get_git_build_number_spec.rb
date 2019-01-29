@@ -24,7 +24,7 @@ describe Fastlane::Actions::GetGitBuildNumberAction do
         .and_return('48082151e7efb50daa6ddb9c0486b80de36e8ea3')
 
       result = Fastlane::FastFile.new.parse("lane :test do
-        get_current_build_number
+        get_git_build_number
       end").runner.execute(:test)
 
       expect(result).to eq(71)
@@ -36,7 +36,7 @@ describe Fastlane::Actions::GetGitBuildNumberAction do
         .and_return('954a29b7a3e69433d080a950be20550f6e2b1306')
 
       result = Fastlane::FastFile.new.parse("lane :test do
-        get_current_build_number
+        get_git_build_number
       end").runner.execute(:test)
 
       expect(result).to eq(nil)
@@ -47,7 +47,7 @@ describe Fastlane::Actions::GetGitBuildNumberAction do
         .and_return('4a49d1e1a9173fdb61779152a68ce7c0e65dde3e')
 
       result = Fastlane::FastFile.new.parse("lane :test do
-        get_current_build_number
+        get_git_build_number
       end").runner.execute(:test)
 
       expect(result).to eq(68)

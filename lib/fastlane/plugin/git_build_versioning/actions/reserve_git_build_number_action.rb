@@ -1,10 +1,13 @@
+require 'fastlane/action'
+require_relative '../helper/git_build_versioning_helper'
+
 module Fastlane
   module Actions
 
-    class GetGitBuildNumberAction < Action
+    class ReserveGitBuildNumberAction < Action
       def self.run(params)
         tag_prefix = (params[:tag_prefix] || 'build/')
-        Helper::GitBuildVersioningHelper.current_build_number(tag_prefix)
+        Helper::GitBuildVersioningHelper.reserve_build_number(tag_prefix)
       end
 
       def self.description
