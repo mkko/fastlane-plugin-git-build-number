@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift(File.expand_path('../lib', __FILE__))
 
-#require 'simplecov'
+# require 'simplecov'
 
 # This module is only used to check the environment is currently a testing env
 module SpecHelper
@@ -12,4 +12,4 @@ require 'fastlane/plugin/git_build_versioning' # import the actual plugin
 Fastlane.load_actions # load other actions (in case your plugin calls other actions or shared values)
 
 # SimpleCov.minimum_coverage 95
-#SimpleCov.start
+# SimpleCov.start

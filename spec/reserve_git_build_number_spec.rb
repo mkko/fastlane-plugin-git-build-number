@@ -19,9 +19,8 @@ describe Fastlane::Actions::ReserveGitBuildNumberAction do
 
   describe 'Reserve build number' do
     it "Returns current build if there's one" do
-
       allow(Fastlane::Actions).to receive(:sh).with("git rev-parse HEAD", anything)
-        .and_return('48082151e7efb50daa6ddb9c0486b80de36e8ea3')
+                                              .and_return('48082151e7efb50daa6ddb9c0486b80de36e8ea3')
 
       result = Fastlane::FastFile.new.parse("lane :test do
         reserve_git_build_number
@@ -32,7 +31,7 @@ describe Fastlane::Actions::ReserveGitBuildNumberAction do
 
     it "Works with multiple build numbers on same commit" do
       allow(Fastlane::Actions).to receive(:sh).with("git rev-parse HEAD", anything)
-        .and_return('4a49d1e1a9173fdb61779152a68ce7c0e65dde3e')
+                                              .and_return('4a49d1e1a9173fdb61779152a68ce7c0e65dde3e')
 
       result = Fastlane::FastFile.new.parse("lane :test do
         reserve_git_build_number
@@ -46,7 +45,7 @@ describe Fastlane::Actions::ReserveGitBuildNumberAction do
       expected_command = "git tag build/#{expected_build} && git push --quiet origin build/#{expected_build}"
 
       allow(Fastlane::Actions).to receive(:sh).with("git rev-parse HEAD", anything)
-        .and_return('954a29b7a3e69433d080a950be20550f6e2b1306')
+                                              .and_return('954a29b7a3e69433d080a950be20550f6e2b1306')
 
       expect(Fastlane::Actions).to receive(:sh).with(expected_command, anything)
 

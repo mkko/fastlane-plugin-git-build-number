@@ -21,16 +21,15 @@ module Fastlane
       end
 
       def build_number
-        if self.is_build_number?
-          tag_name = @str.split('refs/tags/').last.delete_prefix(@tag_prefix)
-          number_or_nil(tag_name)
-        else
-          nil
+        full_name = @str.split('refs/tags/').last
+        m = full_name.match(/^#{@tag_prefix}(\d+)$/)
+        if m && m[1]
+          number_or_nil(m[1])
         end
       end
 
       def is_build_number?
-        (@str.split('refs/tags/').last || '').start_with?(@tag_prefix)
+        build_number != nil
       end
 
       def to_s
@@ -45,6 +44,7 @@ module Fastlane
       rescue
         return false
       end
+
       # class methods that you define here become available in your action
       # as `Helper::GitBuildVersioningHelper.your_method`
       #
@@ -53,30 +53,30 @@ module Fastlane
         tags = self.build_tags(tag_prefix)
 
         current = tags
-          .select { |t| t.hash == head }
-          .map { |t| t.build_number }
-          .last
+                  .select { |t| t.hash == head }
+                  .map(&:build_number)
+                  .last
 
-        if current == nil
+        if current.nil?
           latest = tags
-            .map { |t| t.build_number }
-            .last
+                   .map(&:build_number)
+                   .last
           current = (latest || 0) + 1
-          
+
           tag_name = "#{tag_prefix}#{current}"
           Actions.sh("git tag #{tag_name} && git push --quiet origin #{tag_name}", log: false)
           UI.success("Tagging #{tag_name}")
         else
           UI.success("Current commit already tagged as build #{tag_name}")
         end
-        
+
         current
       end
 
       def self.last_build_number(tag_prefix)
         self.build_tags(tag_prefix)
-          .map { |t| t.build_number }
-          .last
+            .map(&:build_number)
+            .last
       end
 
       def self.current_build_number(tag_prefix)
@@ -84,8 +84,8 @@ module Fastlane
         tags = self.build_tags(tag_prefix)
 
         tags.select { |t| t.hash == head }
-          .map { |t| t.build_number }
-          .last
+            .map(&:build_number)
+            .last
       end
 
       def self.head
@@ -101,19 +101,15 @@ module Fastlane
         if self.is_git?
 
           builds = Actions.sh("git ls-remote --tags --refs --quiet", log: false)
-          tags = builds.split( /\r?\n/ )
-            .map { |s| GitBuildTag.new(s, tag_prefix) }
-            .select { |t| t.build_number != nil }
-            .sort { |a,b| a.build_number <=> b.build_number }
+          tags = builds.split(/\r?\n/)
+                       .map { |s| GitBuildTag.new(s, tag_prefix) }
+                       .reject { |t| t.build_number.nil? }
+                       .sort_by(&:build_number)
 
           tags
         else
           UI.user_error!("No git repository detected")
         end
-      end
-
-      def self.show_message
-        UI.message("Hello from the git_build_versioning plugin helper!")
       end
     end
   end

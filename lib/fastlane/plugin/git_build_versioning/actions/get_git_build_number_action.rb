@@ -3,7 +3,6 @@ require_relative '../helper/git_build_versioning_helper'
 
 module Fastlane
   module Actions
-
     class GetGitBuildNumberAction < Action
       def self.run(params)
         tag_prefix = (params[:tag_prefix] || 'build/')
