@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.author        = 'Mikko Välimäki'
   spec.email         = 'mkko1373@gmail.com'
 
-  spec.summary       = 'Use git for tagging your builds for distributed sequential builds'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-git_build_versioning"
+  spec.summary       = 'Store build numbers in git tags for distributed sequential builds'
+  spec.homepage      = "https://github.com/mkko/fastlane-plugin-git-build-number"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
